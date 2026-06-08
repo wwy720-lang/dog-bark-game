@@ -3,461 +3,957 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>🐶 汪汪大賽</title>
+<title>🐶 BARK BATTLE 汪汪大賽</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    background: #FFF8E7;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-  .screen {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100vw;
-    min-height: 100vh;
-    padding: 30px 20px;
-    text-align: center;
-  }
-  .screen.active { display: flex; }
+:root {
+  --black: #111;
+  --white: #fff;
+  --yellow: #FFE600;
+  --red:    #FF2D2D;
+  --blue:   #1877F2;
+  --green:  #00C853;
+}
 
-  /* ── START SCREEN ── */
-  #screen-start {
-    background: linear-gradient(160deg, #FFD966 0%, #FF9900 100%);
-  }
-  #screen-start .logo { font-size: 90px; margin-bottom: 10px; animation: bounce 1s infinite alternate; }
-  #screen-start h1 { font-size: 2.4rem; font-weight: 900; color: #fff; text-shadow: 3px 3px 0 #c66800; margin-bottom: 8px; }
-  #screen-start .subtitle { font-size: 1rem; color: #fff; opacity: 0.9; margin-bottom: 40px; line-height: 1.6; }
-  .btn {
-    padding: 18px 50px;
-    font-size: 1.3rem;
-    font-weight: 800;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: transform 0.1s, box-shadow 0.1s;
-    box-shadow: 0 6px 0 rgba(0,0,0,0.2);
-  }
-  .btn:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(0,0,0,0.2); }
-  .btn-primary { background: #fff; color: #FF9900; }
-  .btn-secondary { background: #FF9900; color: #fff; margin-top: 14px; }
-  .rules {
-    background: rgba(255,255,255,0.25);
-    border-radius: 16px;
-    padding: 16px 24px;
-    margin-bottom: 36px;
-    color: #fff;
-    font-size: 0.95rem;
-    line-height: 1.8;
-    max-width: 320px;
-  }
-  .rules strong { display: block; font-size: 1.05rem; margin-bottom: 6px; }
+body {
+  font-family: 'Arial Black', 'Helvetica Neue', sans-serif;
+  background: var(--white);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
 
-  /* ── GAME SCREEN ── */
-  #screen-game {
-    background: linear-gradient(160deg, #1a1a2e 0%, #16213e 100%);
-    position: relative;
-  }
-  .timer-ring {
-    position: relative;
-    width: 180px;
-    height: 180px;
-    margin-bottom: 30px;
-  }
-  .timer-ring svg { transform: rotate(-90deg); }
-  .timer-ring circle { fill: none; stroke-width: 10; }
-  .timer-ring .bg { stroke: rgba(255,255,255,0.1); }
-  .timer-ring .fg { stroke: #FFD966; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
-  .timer-text {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-  }
-  .timer-text .seconds { font-size: 3.5rem; font-weight: 900; line-height: 1; }
-  .timer-text .label { font-size: 0.75rem; opacity: 0.6; margin-top: 4px; }
+.screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  min-height: 100vh;
+  padding: 20px 16px;
+  text-align: center;
+}
+.screen.active { display: flex; }
 
-  .volume-section { width: 100%; max-width: 320px; margin-bottom: 28px; }
-  .volume-label { color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-bottom: 10px; }
-  .volume-bar-wrap {
-    background: rgba(255,255,255,0.1);
-    border-radius: 50px;
-    height: 28px;
-    overflow: hidden;
-    position: relative;
-  }
-  .volume-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #56CFE1, #FF6B6B);
-    border-radius: 50px;
-    width: 0%;
-    transition: width 0.1s ease-out;
-  }
-  .volume-peak {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #fff;
-    font-size: 0.8rem;
-    font-weight: 700;
-  }
+/* ── MEME TEXT STYLE ── */
+.meme-text {
+  font-family: 'Arial Black', Impact, sans-serif;
+  letter-spacing: 0.04em;
+  -webkit-text-stroke: 3px var(--black);
+  paint-order: stroke fill;
+}
 
-  .score-live {
-    color: #FFD966;
-    font-size: 1rem;
-    margin-bottom: 6px;
-    opacity: 0.8;
-  }
-  .score-big {
-    font-size: 4.5rem;
-    font-weight: 900;
-    color: #fff;
-    line-height: 1;
-    transition: transform 0.15s;
-  }
-  .score-big.pop { transform: scale(1.2); }
-  .score-unit { color: rgba(255,255,255,0.5); font-size: 1rem; margin-top: 4px; }
+/* ── THICK BORDER BOX ── */
+.meme-box {
+  border: 4px solid var(--black);
+  border-radius: 0;
+  box-shadow: 6px 6px 0 var(--black);
+}
 
-  .dog-react {
-    font-size: 70px;
-    margin-bottom: 10px;
-    transition: transform 0.1s;
-  }
-  .dog-react.loud { transform: scale(1.3) rotate(-5deg); }
+/* ── BUTTONS ── */
+.btn {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.08em;
+  padding: 14px 40px;
+  border: 4px solid var(--black);
+  border-radius: 0;
+  cursor: pointer;
+  box-shadow: 5px 5px 0 var(--black);
+  transition: transform 0.08s, box-shadow 0.08s;
+  text-transform: uppercase;
+}
+.btn:active { transform: translate(4px,4px); box-shadow: 1px 1px 0 var(--black); }
+.btn-yellow { background: var(--yellow); color: var(--black); }
+.btn-red    { background: var(--red);    color: var(--white); }
+.btn-black  { background: var(--black);  color: var(--white); }
+.btn-white  { background: var(--white);  color: var(--black); }
+.btn-sm {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 1rem;
+  padding: 7px 16px;
+  border: 3px solid var(--black);
+  border-radius: 0;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--black);
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+.btn-sm:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--black); }
 
-  /* ── RESULT SCREEN ── */
-  #screen-result {
-    background: linear-gradient(160deg, #0F3460 0%, #533483 100%);
-  }
-  #screen-result .trophy { font-size: 80px; margin-bottom: 8px; animation: pop 0.5s ease-out; }
-  #screen-result h2 { font-size: 1.5rem; color: #FFD966; font-weight: 800; margin-bottom: 6px; }
-  .final-score { font-size: 5.5rem; font-weight: 900; color: #fff; line-height: 1; margin: 10px 0; }
-  .final-score-unit { color: rgba(255,255,255,0.5); font-size: 1.1rem; margin-bottom: 6px; }
-  .final-peak { font-size: 0.95rem; color: rgba(255,255,255,0.6); margin-bottom: 30px; }
+/* ══ WHEEL SCREEN ══ */
+#screen-wheel {
+  background: var(--white);
+  overflow-y: auto;
+  justify-content: flex-start;
+  padding-top: 24px;
+}
 
-  .share-hint {
-    background: rgba(255,255,255,0.12);
-    border-radius: 14px;
-    padding: 16px 20px;
-    color: rgba(255,255,255,0.8);
-    font-size: 0.9rem;
-    line-height: 1.6;
-    max-width: 300px;
-    margin-bottom: 28px;
-  }
-  .share-hint strong { color: #FFD966; }
+.wheel-header {
+  background: var(--black);
+  color: var(--yellow);
+  padding: 10px 30px;
+  margin-bottom: 4px;
+  width: 100%;
+  max-width: 340px;
+}
+.wheel-header h1 {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 2.6rem;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+.wheel-header .subtitle {
+  font-size: 0.75rem;
+  color: rgba(255,230,0,0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
 
-  .btn-group { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; max-width: 280px; }
+.wheel-wrap {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  margin: 10px auto 6px;
+  border: 5px solid var(--black);
+  box-shadow: 8px 8px 0 var(--black);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+#wheel-canvas { border-radius: 50%; display: block; }
+.wheel-pointer {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 34px;
+  pointer-events: none;
+  filter: drop-shadow(2px 2px 0 var(--black));
+}
 
-  /* ── COUNTDOWN OVERLAY ── */
-  #overlay-countdown {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-  }
-  #overlay-countdown.active { display: flex; }
-  .countdown-num {
-    font-size: 8rem;
-    font-weight: 900;
-    color: #FFD966;
-    animation: zoomIn 0.6s ease-out;
-    text-shadow: 0 0 40px rgba(255,217,102,0.6);
-  }
-  .countdown-go {
-    font-size: 3rem;
-    font-weight: 900;
-    color: #fff;
-    animation: zoomIn 0.4s ease-out;
-  }
-  .countdown-dog { font-size: 60px; margin-top: 16px; animation: bounce 0.5s infinite alternate; }
+.spin-label {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+  color: #999;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
 
-  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-12px); } }
-  @keyframes pop { 0% { transform: scale(0); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
-  @keyframes zoomIn { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.wheel-spin-btn { width: 300px; margin-bottom: 18px; }
 
-  /* ── MIC PERMISSION ── */
-  #screen-mic {
-    background: linear-gradient(160deg, #1a1a2e 0%, #16213e 100%);
-  }
-  #screen-mic .icon { font-size: 80px; margin-bottom: 20px; }
-  #screen-mic h2 { font-size: 1.6rem; color: #fff; font-weight: 800; margin-bottom: 12px; }
-  #screen-mic p { color: rgba(255,255,255,0.7); line-height: 1.7; margin-bottom: 30px; max-width: 290px; }
-  .error-msg { color: #FF6B6B; font-size: 0.9rem; margin-top: 14px; display: none; }
+/* Animal editor */
+.animal-editor { width: 100%; max-width: 320px; }
+.editor-title {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  text-align: left;
+  color: #555;
+  padding-left: 4px;
+  margin-bottom: 8px;
+  border-left: 4px solid var(--black);
+  padding-left: 8px;
+}
+.animal-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.animal-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f5f5f5;
+  border: 3px solid var(--black);
+  box-shadow: 3px 3px 0 var(--black);
+  padding: 8px 10px;
+}
+.animal-item .emoji-input {
+  width: 42px;
+  font-size: 1.2rem;
+  text-align: center;
+  background: var(--white);
+  border: 2px solid var(--black);
+  padding: 4px;
+  font-family: inherit;
+}
+.animal-item .name-input {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 900;
+  background: var(--white);
+  border: 2px solid var(--black);
+  padding: 5px 8px;
+  font-family: 'Arial Black', 'Helvetica Neue', sans-serif;
+}
+.animal-item .sound-input {
+  width: 80px;
+  font-size: 0.9rem;
+  font-weight: 900;
+  background: var(--yellow);
+  border: 2px solid var(--black);
+  padding: 5px 6px;
+  text-align: center;
+  font-family: 'Arial Black', 'Helvetica Neue', sans-serif;
+}
+.animal-item .del-btn {
+  background: var(--red);
+  color: var(--white);
+  border: 2px solid var(--black);
+  width: 28px;
+  height: 28px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-weight: 900;
+  flex-shrink: 0;
+  box-shadow: 2px 2px 0 var(--black);
+}
+.add-animal-btn {
+  width: 100%;
+  background: var(--white);
+  color: var(--black);
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  border: 3px dashed var(--black);
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+  box-shadow: none;
+}
+.add-animal-btn:hover { background: #f0f0f0; }
+
+/* ══ SPIN RESULT OVERLAY ══ */
+#overlay-result {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--yellow);
+  z-index: 200;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  border: 12px solid var(--black);
+}
+#overlay-result.active { display: flex; }
+
+.result-tag {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.15em;
+  background: var(--black);
+  color: var(--yellow);
+  padding: 4px 16px;
+  margin-bottom: 10px;
+}
+.spin-result-emoji { font-size: 110px; animation: popIn 0.45s cubic-bezier(0.175,0.885,0.32,1.275); line-height: 1; }
+.spin-result-name  {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 3.5rem;
+  color: var(--black);
+  -webkit-text-stroke: 2px var(--black);
+  line-height: 1;
+  margin: 6px 0 2px;
+}
+.spin-result-sound {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 2rem;
+  color: var(--red);
+  -webkit-text-stroke: 1.5px var(--black);
+  margin-bottom: 6px;
+}
+.spin-result-hint {
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+  background: rgba(255,255,255,0.5);
+  padding: 4px 12px;
+  border: 2px solid var(--black);
+}
+.spin-result-countdown {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 5rem;
+  color: var(--black);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.spin-result-bar-wrap {
+  width: 240px;
+  height: 14px;
+  background: rgba(0,0,0,0.15);
+  border: 3px solid var(--black);
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+.spin-result-bar {
+  height: 100%;
+  background: var(--black);
+  width: 100%;
+  transition: width 1s linear;
+}
+
+/* ══ MIC SCREEN ══ */
+#screen-mic { background: var(--white); }
+.mic-header {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 3rem;
+  color: var(--black);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.mic-sub { font-size: 0.85rem; font-weight: 900; color: #555; margin-bottom: 24px; max-width: 280px; line-height: 1.6; }
+.mic-icon-box {
+  border: 5px solid var(--black);
+  box-shadow: 7px 7px 0 var(--black);
+  background: var(--yellow);
+  padding: 20px 30px;
+  font-size: 80px;
+  margin-bottom: 24px;
+  line-height: 1;
+}
+.error-msg {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 1.1rem;
+  color: var(--red);
+  margin-top: 14px;
+  background: #ffe0e0;
+  border: 2px solid var(--red);
+  padding: 6px 14px;
+  display: none;
+}
+
+/* ══ GAME SCREEN ══ */
+#screen-game { background: var(--black); }
+
+.game-top-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--yellow);
+  border: 4px solid var(--yellow);
+  padding: 8px 20px;
+  margin-bottom: 16px;
+  width: 100%;
+  max-width: 340px;
+  box-shadow: 5px 5px 0 rgba(255,230,0,0.3);
+}
+.game-top-bar .t-emoji { font-size: 2rem; }
+.game-top-bar .t-label { font-size: 0.7rem; font-weight: 900; color: #777; text-transform: uppercase; }
+.game-top-bar .t-sound {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 1.8rem;
+  color: var(--black);
+  line-height: 1;
+}
+
+.timer-ring {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  margin-bottom: 20px;
+}
+.timer-ring svg { transform: rotate(-90deg); }
+.timer-ring circle { fill: none; stroke-width: 12; }
+.timer-ring .bg { stroke: #333; }
+.timer-ring .fg { stroke: var(--yellow); stroke-linecap: butt; transition: stroke-dashoffset 1s linear; }
+.timer-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.timer-text .seconds {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 4.5rem;
+  color: var(--white);
+  line-height: 1;
+  -webkit-text-stroke: 2px var(--yellow);
+}
+.timer-text .t-label { font-size: 0.7rem; color: #aaa; font-weight: 900; text-transform: uppercase; margin-top: 2px; }
+
+.volume-section { width: 100%; max-width: 300px; margin-bottom: 18px; }
+.vol-label { font-family: 'Arial Black', Impact, sans-serif; font-size: 0.85rem; letter-spacing: 0.1em; color: #777; margin-bottom: 6px; }
+.volume-bar-wrap {
+  background: #222;
+  border: 3px solid #444;
+  height: 30px;
+  overflow: hidden;
+  position: relative;
+}
+.volume-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--yellow), var(--red));
+  width: 0%;
+  transition: width 0.1s ease-out;
+}
+.volume-peak {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 0.95rem;
+  color: var(--white);
+}
+
+.score-label {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  color: #777;
+  text-transform: uppercase;
+}
+.score-big {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 6rem;
+  color: var(--white);
+  -webkit-text-stroke: 3px var(--yellow);
+  line-height: 1;
+  transition: transform 0.15s;
+}
+.score-big.pop { transform: scale(1.18); color: var(--yellow); -webkit-text-stroke: 3px var(--white); }
+.score-unit { font-family: 'Arial Black', Impact, sans-serif; font-size: 1rem; color: #777; letter-spacing: 0.1em; margin-top: 2px; }
+
+.animal-react { font-size: 56px; margin-bottom: 4px; transition: transform 0.1s; }
+.animal-react.loud { transform: scale(1.35) rotate(-8deg); }
+
+/* ══ RESULT SCREEN ══ */
+#screen-result { background: var(--white); }
+
+.result-header {
+  background: var(--black);
+  color: var(--white);
+  padding: 12px 30px;
+  width: 100%;
+  max-width: 360px;
+  margin-bottom: 16px;
+  box-shadow: 6px 6px 0 #aaa;
+}
+.result-header .r-tag {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  color: #aaa;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.result-header .r-title {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 2.4rem;
+  color: var(--yellow);
+  line-height: 1;
+}
+
+.trophy-box {
+  border: 5px solid var(--black);
+  box-shadow: 7px 7px 0 var(--black);
+  padding: 16px 24px;
+  background: var(--yellow);
+  font-size: 80px;
+  margin-bottom: 10px;
+  animation: popIn 0.5s ease-out;
+  line-height: 1;
+}
+.result-animal-label {
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+  background: #f5f5f5;
+  border: 2px solid #ddd;
+  padding: 4px 14px;
+}
+.final-score {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 6.5rem;
+  color: var(--black);
+  -webkit-text-stroke: 3px var(--black);
+  line-height: 1;
+  margin: 4px 0;
+}
+.final-score-unit { font-family: 'Arial Black', Impact, sans-serif; font-size: 1.1rem; color: #aaa; letter-spacing: 0.1em; margin-bottom: 4px; }
+.final-peak { font-size: 0.85rem; font-weight: 900; color: #999; margin-bottom: 18px; }
+
+.share-box {
+  border: 4px solid var(--black);
+  box-shadow: 5px 5px 0 var(--black);
+  background: #fff8cc;
+  padding: 12px 18px;
+  max-width: 300px;
+  margin-bottom: 20px;
+  font-size: 0.88rem;
+  font-weight: 900;
+  line-height: 1.7;
+  color: var(--black);
+}
+.share-box .big { font-family: 'Arial Black', Impact, sans-serif; font-size: 1.3rem; color: var(--red); display: block; -webkit-text-stroke: 1px var(--black); }
+
+.btn-group { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; max-width: 280px; }
+
+/* ══ COUNTDOWN 3-2-1 ══ */
+#overlay-countdown {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--black);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+#overlay-countdown.active { display: flex; }
+.countdown-num {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 12rem;
+  color: var(--yellow);
+  -webkit-text-stroke: 5px var(--white);
+  animation: zoomIn 0.45s ease-out;
+  line-height: 1;
+}
+.countdown-go {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 3.5rem;
+  color: var(--white);
+  -webkit-text-stroke: 2px var(--yellow);
+  animation: zoomIn 0.4s ease-out;
+}
+.countdown-animal { font-size: 72px; margin-top: 12px; animation: bounce 0.45s infinite alternate; }
+
+/* ── ANIMATIONS ── */
+@keyframes bounce  { from { transform: translateY(0) rotate(-5deg); } to { transform: translateY(-14px) rotate(5deg); } }
+@keyframes popIn   { 0% { transform: scale(0) rotate(-10deg); opacity:0; } 70% { transform: scale(1.15) rotate(3deg); } 100% { transform: scale(1) rotate(0); opacity:1; } }
+@keyframes zoomIn  { from { transform: scale(0.2); opacity:0; } to { transform: scale(1); opacity:1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+
+input::placeholder { color: #aaa; }
+input:focus { outline: 3px solid var(--black); }
 </style>
 </head>
 <body>
 
-<!-- START -->
-<div id="screen-start" class="screen active">
-  <div class="logo">🐶</div>
-  <h1>汪汪大賽</h1>
-  <p class="subtitle">限時 10 秒<br>誰叫得最大聲就贏！</p>
-  <div class="rules">
-    <strong>📋 玩法</strong>
-    每位玩家各自用手機開啟此頁面<br>
-    按下開始，對著麥克風學狗叫<br>
-    越大聲分數越高，截圖比誰最高分！
+<!-- ══ WHEEL SCREEN ══ -->
+<div id="screen-wheel" class="screen active">
+  <div class="wheel-header meme-box">
+    <h1>🎡 BARK BATTLE</h1>
+    <div class="subtitle">轉轉盤・抽動物・比誰最大聲 lol</div>
   </div>
-  <button class="btn btn-primary" onclick="goToMic()">準備開始 🎤</button>
+
+  <div class="wheel-wrap">
+    <div class="wheel-pointer">▼</div>
+    <canvas id="wheel-canvas" width="300" height="300"></canvas>
+  </div>
+
+  <div class="spin-label">— 點下去轉就對了 —</div>
+  <button class="btn btn-yellow wheel-spin-btn" id="spin-btn" onclick="spinWheel()">
+    🎰 LET'S GOOO！
+  </button>
+
+  <div class="animal-editor">
+    <div class="editor-title">✏️ 自訂動物（表情 / 名稱 / 叫聲）</div>
+    <div class="animal-list" id="animal-list"></div>
+    <button class="add-animal-btn" onclick="addAnimal()">＋ 加入新動物 OK啦</button>
+  </div>
+  <div style="height:30px"></div>
 </div>
 
-<!-- MIC PERMISSION -->
+<!-- ══ SPIN RESULT OVERLAY ══ -->
+<div id="overlay-result">
+  <div class="result-tag">🎯 你抽到了！！</div>
+  <div class="spin-result-emoji" id="res-emoji">🐶</div>
+  <div class="spin-result-name"  id="res-name">小狗</div>
+  <div class="spin-result-sound" id="res-sound">汪汪！</div>
+  <div class="spin-result-hint">GET READY TO YELL 🎤</div>
+  <div class="spin-result-countdown" id="res-countdown">5</div>
+  <div class="spin-result-bar-wrap">
+    <div class="spin-result-bar" id="res-bar"></div>
+  </div>
+  <button class="btn btn-black" onclick="skipWait()" style="font-size:1rem;padding:10px 28px;">
+    跳過等待 / SKIP ▶
+  </button>
+</div>
+
+<!-- ══ MIC SCREEN ══ -->
 <div id="screen-mic" class="screen">
-  <div class="icon">🎤</div>
-  <h2>需要麥克風權限</h2>
-  <p>遊戲需要使用麥克風來偵測你的聲音大小。<br>請允許麥克風存取，才能正常計分！</p>
-  <button class="btn btn-primary" onclick="requestMic()">允許麥克風</button>
-  <div id="mic-error" class="error-msg">無法取得麥克風，請檢查瀏覽器設定後重試。</div>
+  <div class="mic-icon-box">🎤</div>
+  <div class="mic-header">MIC CHECK<br>麥克風權限</div>
+  <p class="mic-sub">需要麥克風才能偵測你有多大聲<br>沒開麥就是 0 分 lol，趕快允許啦</p>
+  <button class="btn btn-yellow" onclick="requestMic()">允許麥克風 OK</button>
+  <div id="mic-error" class="error-msg">⚠ 麥克風掛了啦，去瀏覽器設定修一下</div>
 </div>
 
-<!-- GAME -->
+<!-- ══ GAME SCREEN ══ -->
 <div id="screen-game" class="screen">
-  <div class="dog-react" id="dog-react">🐶</div>
+  <div class="animal-react" id="animal-react">🐶</div>
+
+  <div class="game-top-bar meme-box">
+    <span class="t-emoji" id="badge-emoji">🐶</span>
+    <div style="flex:1;text-align:left">
+      <div class="t-label">現在模仿 / IMITATE</div>
+      <div class="t-sound" id="badge-sound">汪汪！</div>
+    </div>
+  </div>
+
   <div class="timer-ring">
     <svg viewBox="0 0 180 180" width="180" height="180">
       <circle class="bg" cx="90" cy="90" r="80"/>
       <circle class="fg" id="timer-arc" cx="90" cy="90" r="80"
-        stroke-dasharray="502.65"
-        stroke-dashoffset="0"/>
+        stroke-dasharray="502.65" stroke-dashoffset="0"/>
     </svg>
     <div class="timer-text">
       <span class="seconds" id="timer-display">10</span>
-      <span class="label">秒</span>
+      <span class="t-label">SECONDS LEFT</span>
     </div>
   </div>
 
   <div class="volume-section">
-    <div class="volume-label">即時音量</div>
+    <div class="vol-label">VOLUME / 音量</div>
     <div class="volume-bar-wrap">
       <div class="volume-bar" id="volume-bar"></div>
       <span class="volume-peak" id="volume-peak">0%</span>
     </div>
   </div>
 
-  <div class="score-live">目前分數</div>
+  <div class="score-label">SCORE / 分數</div>
   <div class="score-big" id="score-display">0</div>
-  <div class="score-unit">分</div>
+  <div class="score-unit">POINTS</div>
 </div>
 
-<!-- RESULT -->
+<!-- ══ RESULT SCREEN ══ -->
 <div id="screen-result" class="screen">
-  <div class="trophy" id="result-trophy">🏆</div>
-  <h2 id="result-title">你的成績</h2>
-  <div class="final-score" id="final-score">0</div>
-  <div class="final-score-unit">分</div>
-  <div class="final-peak" id="final-peak">最大音量：0%</div>
-  <div class="share-hint">
-    📸 截圖這個畫面<br>
-    <strong>和朋友比比看誰分數最高！</strong>
+  <div class="result-header meme-box">
+    <div class="r-tag">GAME OVER / 結果出爐</div>
+    <div class="r-title" id="result-title">你的成績</div>
   </div>
+
+  <div class="trophy-box" id="result-trophy">🏆</div>
+  <div class="result-animal-label" id="result-animal-label">模仿了：🐶 小狗（汪汪）</div>
+  <div class="final-score" id="final-score">0</div>
+  <div class="final-score-unit">POINTS 分</div>
+  <div class="final-peak" id="final-peak">最大音量 / PEAK：0%</div>
+
+  <div class="share-box meme-box">
+    <span class="big">📸 SCREENSHOT THIS！</span>
+    截圖傳給朋友<br>
+    看誰叫得最大聲 lmao
+  </div>
+
   <div class="btn-group">
-    <button class="btn btn-primary" onclick="restartGame()">再玩一次 🔄</button>
-    <button class="btn btn-secondary" onclick="showScreen('screen-start')">回首頁</button>
+    <button class="btn btn-yellow" onclick="goBackToWheel()">再轉一次 AGAIN 🎡</button>
+    <button class="btn btn-black"  onclick="restartSameAnimal()">同動物再玩 RETRY 🔄</button>
   </div>
 </div>
 
-<!-- COUNTDOWN OVERLAY -->
+<!-- ══ COUNTDOWN 3-2-1 ══ -->
 <div id="overlay-countdown">
   <div id="countdown-content"></div>
-  <div class="countdown-dog">🐶</div>
+  <div class="countdown-animal" id="countdown-animal">🐶</div>
 </div>
 
 <script>
-let audioCtx = null;
-let analyser = null;
-let micStream = null;
-let gameTimer = null;
-let animFrame = null;
-let timeLeft = 30;
-let score = 0;
-let peakVolume = 0;
-const GAME_DURATION = 10;
-const CIRCUMFERENCE = 2 * Math.PI * 80; // 502.65
+/* ─── ANIMALS ─── */
+let animals = [
+  { emoji: '🐸', name: '青蛙',   sound: '呱呱' },
+  { emoji: '🐶', name: '小狗',   sound: '汪汪' },
+  { emoji: '🐱', name: '小貓',   sound: '喵喵' },
+  { emoji: '⚡', name: '閃電鳥', sound: '閃電' },
+  { emoji: '🦖', name: '暴飛龍', sound: '靠北' },
+];
+let pickedAnimal = null;
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+/* ─── WHEEL ─── */
+const COLORS = ['#FF2D2D','#FFE600','#1877F2','#FF6B00','#9B5DE5','#00C853','#FF2D8A','#00C8C8'];
+let wheelAngle = 0, spinning = false;
+
+function drawWheel() {
+  const canvas = document.getElementById('wheel-canvas');
+  const ctx = canvas.getContext('2d');
+  const cx = 150, cy = 150, r = 144;
+  const n = animals.length;
+  const arc = (2 * Math.PI) / n;
+  ctx.clearRect(0,0,300,300);
+
+  animals.forEach((a, i) => {
+    const start = wheelAngle + i * arc;
+    const end   = start + arc;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, end);
+    ctx.closePath();
+    ctx.fillStyle = COLORS[i % COLORS.length];
+    ctx.fill();
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(start + arc / 2);
+    ctx.textAlign = 'right';
+    ctx.font = 'bold 14px "Noto Sans TC", sans-serif';
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 3;
+    ctx.strokeText(a.emoji + ' ' + a.name, r - 10, 5);
+    ctx.fillText(a.emoji + ' ' + a.name, r - 10, 5);
+    ctx.restore();
+  });
+
+  // center
+  ctx.beginPath();
+  ctx.arc(cx, cy, 24, 0, 2*Math.PI);
+  ctx.fillStyle = '#111';
+  ctx.fill();
+  ctx.strokeStyle = '#FFE600';
+  ctx.lineWidth = 4;
+  ctx.stroke();
 }
 
-function goToMic() {
+function spinWheel() {
+  if (spinning || animals.length < 2) return;
+  spinning = true;
+  document.getElementById('spin-btn').disabled = true;
+
+  const extraSpins  = (5 + Math.random() * 5) * 2 * Math.PI;
+  const duration    = 3000 + Math.random() * 1000;
+  const startAngle  = wheelAngle;
+  const startTime   = performance.now();
+  const ease = t => 1 - Math.pow(1 - t, 4);
+
+  function animate(now) {
+    const t = Math.min((now - startTime) / duration, 1);
+    wheelAngle = startAngle + extraSpins * ease(t);
+    drawWheel();
+    if (t < 1) requestAnimationFrame(animate);
+    else {
+      spinning = false;
+      document.getElementById('spin-btn').disabled = false;
+      resolveWinner();
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+function resolveWinner() {
+  const n = animals.length;
+  const arc = (2 * Math.PI) / n;
+  const normalized = (((-wheelAngle - Math.PI / 2) % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+  pickedAnimal = animals[Math.floor(normalized / arc) % n];
+  showSpinResult();
+}
+
+/* ─── SPIN RESULT 5s ─── */
+let waitTimer = null;
+let waitSecondsLeft = 5;
+
+function showSpinResult() {
+  document.getElementById('res-emoji').textContent = pickedAnimal.emoji;
+  document.getElementById('res-name').textContent  = pickedAnimal.name;
+  document.getElementById('res-sound').textContent = pickedAnimal.sound + '！';
+  document.getElementById('overlay-result').classList.add('active');
+
+  waitSecondsLeft = 5;
+  document.getElementById('res-countdown').textContent = 5;
+  const bar = document.getElementById('res-bar');
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  setTimeout(() => { bar.style.transition = 'width 5s linear'; bar.style.width = '0%'; }, 50);
+
+  waitTimer = setInterval(() => {
+    waitSecondsLeft--;
+    document.getElementById('res-countdown').textContent = waitSecondsLeft;
+    if (waitSecondsLeft <= 0) { clearInterval(waitTimer); proceedToMic(); }
+  }, 1000);
+}
+
+function skipWait() {
+  clearInterval(waitTimer);
+  proceedToMic();
+}
+function proceedToMic() {
+  document.getElementById('overlay-result').classList.remove('active');
   showScreen('screen-mic');
+  document.getElementById('mic-error').style.display = 'none';
 }
+
+/* ─── ANIMAL EDITOR ─── */
+function renderAnimalList() {
+  const list = document.getElementById('animal-list');
+  list.innerHTML = '';
+  animals.forEach((a, i) => {
+    const row = document.createElement('div');
+    row.className = 'animal-item';
+    row.innerHTML = `
+      <input class="emoji-input" type="text" value="${a.emoji}" maxlength="2"
+        oninput="animals[${i}].emoji=this.value; drawWheel()">
+      <input class="name-input" type="text" value="${a.name}" placeholder="動物名稱"
+        oninput="animals[${i}].name=this.value; drawWheel()">
+      <input class="sound-input" type="text" value="${a.sound}" placeholder="叫聲"
+        oninput="animals[${i}].sound=this.value">
+      <button class="del-btn" onclick="removeAnimal(${i})">✕</button>
+    `;
+    list.appendChild(row);
+  });
+  drawWheel();
+}
+function addAnimal() {
+  animals.push({ emoji: '🐾', name: '新動物', sound: '嗚嗚' });
+  renderAnimalList();
+}
+function removeAnimal(i) {
+  if (animals.length <= 2) { alert('至少要留 2 個動物啦！'); return; }
+  animals.splice(i, 1);
+  renderAnimalList();
+}
+
+/* ─── MIC ─── */
+let audioCtx = null, analyser = null, micStream = null;
 
 async function requestMic() {
   document.getElementById('mic-error').style.display = 'none';
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
     micStream = stream;
-    setupAudio(stream);
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    analyser.smoothingTimeConstant = 0.4;
+    audioCtx.createMediaStreamSource(stream).connect(analyser);
+    showScreen('screen-game');
+    updateGameBadge();
     startCountdown();
   } catch (e) {
     document.getElementById('mic-error').style.display = 'block';
   }
 }
 
-function setupAudio(stream) {
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  analyser = audioCtx.createAnalyser();
-  analyser.fftSize = 256;
-  analyser.smoothingTimeConstant = 0.4;
-  const source = audioCtx.createMediaStreamSource(stream);
-  source.connect(analyser);
+function getVolume() {
+  const d = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(d);
+  return Math.min(100, Math.round((d.reduce((a,b)=>a+b,0) / d.length / 128) * 100));
 }
 
-function getVolume() {
-  const data = new Uint8Array(analyser.frequencyBinCount);
-  analyser.getByteFrequencyData(data);
-  let sum = 0;
-  for (let i = 0; i < data.length; i++) sum += data[i];
-  const avg = sum / data.length;
-  return Math.min(100, Math.round((avg / 128) * 100));
+/* ─── GAME ─── */
+let gameTimer = null, animFrame = null, timeLeft = 10, score = 0, peakVolume = 0;
+const GAME_DURATION = 10;
+const CIRCUMFERENCE = 2 * Math.PI * 80;
+
+function updateGameBadge() {
+  if (!pickedAnimal) return;
+  document.getElementById('badge-emoji').textContent   = pickedAnimal.emoji;
+  document.getElementById('badge-sound').textContent   = pickedAnimal.sound + '！';
+  document.getElementById('animal-react').textContent  = pickedAnimal.emoji;
+  document.getElementById('countdown-animal').textContent = pickedAnimal.emoji;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
 function startCountdown() {
   const overlay = document.getElementById('overlay-countdown');
   const content = document.getElementById('countdown-content');
   overlay.classList.add('active');
-  showScreen('screen-game');
 
-  const steps = ['3', '2', '1'];
+  const steps = ['3','2','1'];
   let i = 0;
-
   function tick() {
     if (i < steps.length) {
       content.innerHTML = `<div class="countdown-num">${steps[i]}</div>`;
       i++;
       setTimeout(tick, 800);
     } else {
-      content.innerHTML = `<div class="countdown-go">汪！🐶</div>`;
-      setTimeout(() => {
-        overlay.classList.remove('active');
-        startGame();
-      }, 700);
+      const go = pickedAnimal ? pickedAnimal.sound.toUpperCase() + '!!' : 'GO!!';
+      content.innerHTML = `<div class="countdown-go">${go}</div>`;
+      setTimeout(() => { overlay.classList.remove('active'); startGame(); }, 700);
     }
   }
   tick();
 }
 
 function startGame() {
-  timeLeft = GAME_DURATION;
-  score = 0;
-  peakVolume = 0;
-
+  timeLeft = GAME_DURATION; score = 0; peakVolume = 0;
   updateTimerArc(GAME_DURATION);
   document.getElementById('timer-display').textContent = GAME_DURATION;
-
   document.getElementById('score-display').textContent = '0';
-
   gameTimer = setInterval(() => {
     timeLeft--;
     document.getElementById('timer-display').textContent = timeLeft;
     updateTimerArc(timeLeft);
     if (timeLeft <= 0) endGame();
   }, 1000);
-
   animFrame = requestAnimationFrame(volumeLoop);
 }
 
 function volumeLoop() {
   if (timeLeft <= 0) return;
   const vol = getVolume();
-
-  // volume bar
   document.getElementById('volume-bar').style.width = vol + '%';
   document.getElementById('volume-peak').textContent = vol + '%';
-
-  // score: accumulate weighted volume
-  const gained = Math.pow(vol / 100, 1.5) * 8;
+  const gained = Math.pow(vol/100, 1.5) * 8;
   score += gained;
-
   if (vol > peakVolume) peakVolume = vol;
-
-  const displayScore = Math.round(score);
   const el = document.getElementById('score-display');
-  el.textContent = displayScore;
+  el.textContent = Math.round(score);
   el.classList.toggle('pop', vol > 60);
-
-  // dog reaction
-  const dog = document.getElementById('dog-react');
-  if (vol > 70) dog.textContent = '🐕';
-  else if (vol > 40) dog.textContent = '🐶';
-  else dog.textContent = '😴';
-  dog.classList.toggle('loud', vol > 60);
-
+  const react = document.getElementById('animal-react');
+  react.textContent = pickedAnimal ? pickedAnimal.emoji : '🐶';
+  react.classList.toggle('loud', vol > 60);
   animFrame = requestAnimationFrame(volumeLoop);
 }
 
 function updateTimerArc(t) {
-  const offset = CIRCUMFERENCE * (1 - t / GAME_DURATION);
-  document.getElementById('timer-arc').style.strokeDashoffset = offset;
-
-  // color change as time runs out
-  const arc = document.getElementById('timer-arc');
-  if (t <= 5) arc.style.stroke = '#FF6B6B';
-  else if (t <= 10) arc.style.stroke = '#FF9900';
-  else arc.style.stroke = '#FFD966';
+  document.getElementById('timer-arc').style.strokeDashoffset = CIRCUMFERENCE * (1 - t/GAME_DURATION);
+  document.getElementById('timer-arc').style.stroke = t <= 3 ? '#FF2D2D' : t <= 6 ? '#FF6B00' : '#FFE600';
 }
 
 function endGame() {
-  clearInterval(gameTimer);
-  cancelAnimationFrame(animFrame);
+  clearInterval(gameTimer); cancelAnimationFrame(animFrame);
+  if (micStream) { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  if (audioCtx)  { audioCtx.close(); audioCtx = null; }
 
-  // stop mic
-  if (micStream) {
-    micStream.getTracks().forEach(t => t.stop());
-    micStream = null;
-  }
-  if (audioCtx) { audioCtx.close(); audioCtx = null; }
-
-  const finalScore = Math.round(score);
-
-  // pick trophy emoji by score
-  let trophy = '🐾';
-  if (finalScore >= 800) trophy = '🏆';
-  else if (finalScore >= 500) trophy = '🥇';
-  else if (finalScore >= 300) trophy = '🥈';
-  else if (finalScore >= 150) trophy = '🥉';
+  const s = Math.round(score);
+  let trophy = '💀';
+  if (s >= 600) trophy = '🏆';
+  else if (s >= 400) trophy = '🥇';
+  else if (s >= 250) trophy = '🥈';
+  else if (s >= 100) trophy = '🥉';
 
   document.getElementById('result-trophy').textContent = trophy;
-  document.getElementById('final-score').textContent = finalScore;
-  document.getElementById('final-peak').textContent = `最大音量：${peakVolume}%`;
+  document.getElementById('final-score').textContent   = s;
+  document.getElementById('final-peak').textContent    = `最大音量 / PEAK：${peakVolume}%`;
+  document.getElementById('result-animal-label').textContent =
+    pickedAnimal ? `模仿了：${pickedAnimal.emoji} ${pickedAnimal.name}（${pickedAnimal.sound}）` : '';
 
-  // title flavour
   const titles = [
-    [800, '汪星人轉世！👑'],
-    [500, '狗叫大師！🐕'],
-    [300, '有點汪味 🐶'],
-    [100, '小小狗狗 🐾'],
-    [0,   '下次再努力 😴'],
+    [600, 'GOD TIER 叫聲之神 👑'],
+    [400, 'PRO BARKER 模仿天才 🌟'],
+    [250, 'NOT BAD 還可以啦 👍'],
+    [100, 'KEEP TRYING 繼續加油 💪'],
+    [0,   'BRUH 你有開麥嗎 💀'],
   ];
-  const t = titles.find(([min]) => finalScore >= min);
-  document.getElementById('result-title').textContent = t ? t[1] : '你的成績';
-
+  document.getElementById('result-title').textContent = (titles.find(([m]) => s >= m) || titles[4])[1];
   showScreen('screen-result');
 }
 
-function restartGame() {
+function goBackToWheel()       { showScreen('screen-wheel'); }
+function restartSameAnimal()   {
+  if (!pickedAnimal) { goBackToWheel(); return; }
   showScreen('screen-mic');
   document.getElementById('mic-error').style.display = 'none';
   requestMic();
 }
+
+/* ─── INIT ─── */
+renderAnimalList();
 </script>
 </body>
 </html>
