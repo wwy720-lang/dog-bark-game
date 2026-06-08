@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🐶 汪汪大賽</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background: #FFF8E7;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    min-height: 100vh;
+    padding: 30px 20px;
+    text-align: center;
+  }
+  .screen.active { display: flex; }
+
+  /* ── START SCREEN ── */
+  #screen-start {
+    background: linear-gradient(160deg, #FFD966 0%, #FF9900 100%);
+  }
+  #screen-start .logo { font-size: 90px; margin-bottom: 10px; animation: bounce 1s infinite alternate; }
+  #screen-start h1 { font-size: 2.4rem; font-weight: 900; color: #fff; text-shadow: 3px 3px 0 #c66800; margin-bottom: 8px; }
+  #screen-start .subtitle { font-size: 1rem; color: #fff; opacity: 0.9; margin-bottom: 40px; line-height: 1.6; }
+  .btn {
+    padding: 18px 50px;
+    font-size: 1.3rem;
+    font-weight: 800;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+  }
+  .btn:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(0,0,0,0.2); }
+  .btn-primary { background: #fff; color: #FF9900; }
+  .btn-secondary { background: #FF9900; color: #fff; margin-top: 14px; }
+  .rules {
+    background: rgba(255,255,255,0.25);
+    border-radius: 16px;
+    padding: 16px 24px;
+    margin-bottom: 36px;
+    color: #fff;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    max-width: 320px;
+  }
+  .rules strong { display: block; font-size: 1.05rem; margin-bottom: 6px; }
+
+  /* ── GAME SCREEN ── */
+  #screen-game {
+    background: linear-gradient(160deg, #1a1a2e 0%, #16213e 100%);
+    position: relative;
+  }
+  .timer-ring {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin-bottom: 30px;
+  }
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring circle { fill: none; stroke-width: 10; }
+  .timer-ring .bg { stroke: rgba(255,255,255,0.1); }
+  .timer-ring .fg { stroke: #FFD966; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+  .timer-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+  .timer-text .seconds { font-size: 3.5rem; font-weight: 900; line-height: 1; }
+  .timer-text .label { font-size: 0.75rem; opacity: 0.6; margin-top: 4px; }
+
+  .volume-section { width: 100%; max-width: 320px; margin-bottom: 28px; }
+  .volume-label { color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-bottom: 10px; }
+  .volume-bar-wrap {
+    background: rgba(255,255,255,0.1);
+    border-radius: 50px;
+    height: 28px;
+    overflow: hidden;
+    position: relative;
+  }
+  .volume-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #56CFE1, #FF6B6B);
+    border-radius: 50px;
+    width: 0%;
+    transition: width 0.1s ease-out;
+  }
+  .volume-peak {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .score-live {
+    color: #FFD966;
+    font-size: 1rem;
+    margin-bottom: 6px;
+    opacity: 0.8;
+  }
+  .score-big {
+    font-size: 4.5rem;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+    transition: transform 0.15s;
+  }
+  .score-big.pop { transform: scale(1.2); }
+  .score-unit { color: rgba(255,255,255,0.5); font-size: 1rem; margin-top: 4px; }
+
+  .dog-react {
+    font-size: 70px;
+    margin-bottom: 10px;
+    transition: transform 0.1s;
+  }
+  .dog-react.loud { transform: scale(1.3) rotate(-5deg); }
+
+  /* ── RESULT SCREEN ── */
+  #screen-result {
+    background: linear-gradient(160deg, #0F3460 0%, #533483 100%);
+  }
+  #screen-result .trophy { font-size: 80px; margin-bottom: 8px; animation: pop 0.5s ease-out; }
+  #screen-result h2 { font-size: 1.5rem; color: #FFD966; font-weight: 800; margin-bottom: 6px; }
+  .final-score { font-size: 5.5rem; font-weight: 900; color: #fff; line-height: 1; margin: 10px 0; }
+  .final-score-unit { color: rgba(255,255,255,0.5); font-size: 1.1rem; margin-bottom: 6px; }
+  .final-peak { font-size: 0.95rem; color: rgba(255,255,255,0.6); margin-bottom: 30px; }
+
+  .share-hint {
+    background: rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 16px 20px;
+    color: rgba(255,255,255,0.8);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    max-width: 300px;
+    margin-bottom: 28px;
+  }
+  .share-hint strong { color: #FFD966; }
+
+  .btn-group { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; max-width: 280px; }
+
+  /* ── COUNTDOWN OVERLAY ── */
+  #overlay-countdown {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  #overlay-countdown.active { display: flex; }
+  .countdown-num {
+    font-size: 8rem;
+    font-weight: 900;
+    color: #FFD966;
+    animation: zoomIn 0.6s ease-out;
+    text-shadow: 0 0 40px rgba(255,217,102,0.6);
+  }
+  .countdown-go {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #fff;
+    animation: zoomIn 0.4s ease-out;
+  }
+  .countdown-dog { font-size: 60px; margin-top: 16px; animation: bounce 0.5s infinite alternate; }
+
+  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-12px); } }
+  @keyframes pop { 0% { transform: scale(0); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
+  @keyframes zoomIn { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  /* ── MIC PERMISSION ── */
+  #screen-mic {
+    background: linear-gradient(160deg, #1a1a2e 0%, #16213e 100%);
+  }
+  #screen-mic .icon { font-size: 80px; margin-bottom: 20px; }
+  #screen-mic h2 { font-size: 1.6rem; color: #fff; font-weight: 800; margin-bottom: 12px; }
+  #screen-mic p { color: rgba(255,255,255,0.7); line-height: 1.7; margin-bottom: 30px; max-width: 290px; }
+  .error-msg { color: #FF6B6B; font-size: 0.9rem; margin-top: 14px; display: none; }
+</style>
+</head>
+<body>
+
+<!-- START -->
+<div id="screen-start" class="screen active">
+  <div class="logo">🐶</div>
+  <h1>汪汪大賽</h1>
+  <p class="subtitle">限時 10 秒<br>誰叫得最大聲就贏！</p>
+  <div class="rules">
+    <strong>📋 玩法</strong>
+    每位玩家各自用手機開啟此頁面<br>
+    按下開始，對著麥克風學狗叫<br>
+    越大聲分數越高，截圖比誰最高分！
+  </div>
+  <button class="btn btn-primary" onclick="goToMic()">準備開始 🎤</button>
+</div>
+
+<!-- MIC PERMISSION -->
+<div id="screen-mic" class="screen">
+  <div class="icon">🎤</div>
+  <h2>需要麥克風權限</h2>
+  <p>遊戲需要使用麥克風來偵測你的聲音大小。<br>請允許麥克風存取，才能正常計分！</p>
+  <button class="btn btn-primary" onclick="requestMic()">允許麥克風</button>
+  <div id="mic-error" class="error-msg">無法取得麥克風，請檢查瀏覽器設定後重試。</div>
+</div>
+
+<!-- GAME -->
+<div id="screen-game" class="screen">
+  <div class="dog-react" id="dog-react">🐶</div>
+  <div class="timer-ring">
+    <svg viewBox="0 0 180 180" width="180" height="180">
+      <circle class="bg" cx="90" cy="90" r="80"/>
+      <circle class="fg" id="timer-arc" cx="90" cy="90" r="80"
+        stroke-dasharray="502.65"
+        stroke-dashoffset="0"/>
+    </svg>
+    <div class="timer-text">
+      <span class="seconds" id="timer-display">10</span>
+      <span class="label">秒</span>
+    </div>
+  </div>
+
+  <div class="volume-section">
+    <div class="volume-label">即時音量</div>
+    <div class="volume-bar-wrap">
+      <div class="volume-bar" id="volume-bar"></div>
+      <span class="volume-peak" id="volume-peak">0%</span>
+    </div>
+  </div>
+
+  <div class="score-live">目前分數</div>
+  <div class="score-big" id="score-display">0</div>
+  <div class="score-unit">分</div>
+</div>
+
+<!-- RESULT -->
+<div id="screen-result" class="screen">
+  <div class="trophy" id="result-trophy">🏆</div>
+  <h2 id="result-title">你的成績</h2>
+  <div class="final-score" id="final-score">0</div>
+  <div class="final-score-unit">分</div>
+  <div class="final-peak" id="final-peak">最大音量：0%</div>
+  <div class="share-hint">
+    📸 截圖這個畫面<br>
+    <strong>和朋友比比看誰分數最高！</strong>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-primary" onclick="restartGame()">再玩一次 🔄</button>
+    <button class="btn btn-secondary" onclick="showScreen('screen-start')">回首頁</button>
+  </div>
+</div>
+
+<!-- COUNTDOWN OVERLAY -->
+<div id="overlay-countdown">
+  <div id="countdown-content"></div>
+  <div class="countdown-dog">🐶</div>
+</div>
+
+<script>
+let audioCtx = null;
+let analyser = null;
+let micStream = null;
+let gameTimer = null;
+let animFrame = null;
+let timeLeft = 30;
+let score = 0;
+let peakVolume = 0;
+const GAME_DURATION = 10;
+const CIRCUMFERENCE = 2 * Math.PI * 80; // 502.65
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goToMic() {
+  showScreen('screen-mic');
+}
+
+async function requestMic() {
+  document.getElementById('mic-error').style.display = 'none';
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    micStream = stream;
+    setupAudio(stream);
+    startCountdown();
+  } catch (e) {
+    document.getElementById('mic-error').style.display = 'block';
+  }
+}
+
+function setupAudio(stream) {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 256;
+  analyser.smoothingTimeConstant = 0.4;
+  const source = audioCtx.createMediaStreamSource(stream);
+  source.connect(analyser);
+}
+
+function getVolume() {
+  const data = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(data);
+  let sum = 0;
+  for (let i = 0; i < data.length; i++) sum += data[i];
+  const avg = sum / data.length;
+  return Math.min(100, Math.round((avg / 128) * 100));
+}
+
+function startCountdown() {
+  const overlay = document.getElementById('overlay-countdown');
+  const content = document.getElementById('countdown-content');
+  overlay.classList.add('active');
+  showScreen('screen-game');
+
+  const steps = ['3', '2', '1'];
+  let i = 0;
+
+  function tick() {
+    if (i < steps.length) {
+      content.innerHTML = `<div class="countdown-num">${steps[i]}</div>`;
+      i++;
+      setTimeout(tick, 800);
+    } else {
+      content.innerHTML = `<div class="countdown-go">汪！🐶</div>`;
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        startGame();
+      }, 700);
+    }
+  }
+  tick();
+}
+
+function startGame() {
+  timeLeft = GAME_DURATION;
+  score = 0;
+  peakVolume = 0;
+
+  updateTimerArc(GAME_DURATION);
+  document.getElementById('timer-display').textContent = GAME_DURATION;
+
+  document.getElementById('score-display').textContent = '0';
+
+  gameTimer = setInterval(() => {
+    timeLeft--;
+    document.getElementById('timer-display').textContent = timeLeft;
+    updateTimerArc(timeLeft);
+    if (timeLeft <= 0) endGame();
+  }, 1000);
+
+  animFrame = requestAnimationFrame(volumeLoop);
+}
+
+function volumeLoop() {
+  if (timeLeft <= 0) return;
+  const vol = getVolume();
+
+  // volume bar
+  document.getElementById('volume-bar').style.width = vol + '%';
+  document.getElementById('volume-peak').textContent = vol + '%';
+
+  // score: accumulate weighted volume
+  const gained = Math.pow(vol / 100, 1.5) * 8;
+  score += gained;
+
+  if (vol > peakVolume) peakVolume = vol;
+
+  const displayScore = Math.round(score);
+  const el = document.getElementById('score-display');
+  el.textContent = displayScore;
+  el.classList.toggle('pop', vol > 60);
+
+  // dog reaction
+  const dog = document.getElementById('dog-react');
+  if (vol > 70) dog.textContent = '🐕';
+  else if (vol > 40) dog.textContent = '🐶';
+  else dog.textContent = '😴';
+  dog.classList.toggle('loud', vol > 60);
+
+  animFrame = requestAnimationFrame(volumeLoop);
+}
+
+function updateTimerArc(t) {
+  const offset = CIRCUMFERENCE * (1 - t / GAME_DURATION);
+  document.getElementById('timer-arc').style.strokeDashoffset = offset;
+
+  // color change as time runs out
+  const arc = document.getElementById('timer-arc');
+  if (t <= 5) arc.style.stroke = '#FF6B6B';
+  else if (t <= 10) arc.style.stroke = '#FF9900';
+  else arc.style.stroke = '#FFD966';
+}
+
+function endGame() {
+  clearInterval(gameTimer);
+  cancelAnimationFrame(animFrame);
+
+  // stop mic
+  if (micStream) {
+    micStream.getTracks().forEach(t => t.stop());
+    micStream = null;
+  }
+  if (audioCtx) { audioCtx.close(); audioCtx = null; }
+
+  const finalScore = Math.round(score);
+
+  // pick trophy emoji by score
+  let trophy = '🐾';
+  if (finalScore >= 800) trophy = '🏆';
+  else if (finalScore >= 500) trophy = '🥇';
+  else if (finalScore >= 300) trophy = '🥈';
+  else if (finalScore >= 150) trophy = '🥉';
+
+  document.getElementById('result-trophy').textContent = trophy;
+  document.getElementById('final-score').textContent = finalScore;
+  document.getElementById('final-peak').textContent = `最大音量：${peakVolume}%`;
+
+  // title flavour
+  const titles = [
+    [800, '汪星人轉世！👑'],
+    [500, '狗叫大師！🐕'],
+    [300, '有點汪味 🐶'],
+    [100, '小小狗狗 🐾'],
+    [0,   '下次再努力 😴'],
+  ];
+  const t = titles.find(([min]) => finalScore >= min);
+  document.getElementById('result-title').textContent = t ? t[1] : '你的成績';
+
+  showScreen('screen-result');
+}
+
+function restartGame() {
+  showScreen('screen-mic');
+  document.getElementById('mic-error').style.display = 'none';
+  requestMic();
+}
+</script>
+</body>
+</html>
