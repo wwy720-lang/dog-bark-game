@@ -21,20 +21,19 @@ body {
   font-family: 'Arial Black', 'Helvetica Neue', sans-serif;
   background: var(--white);
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  display: block;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .screen {
   display: none;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 100vw;
+  justify-content: flex-start;
+  width: 100%;
   min-height: 100vh;
-  padding: 20px 16px;
+  padding: 20px 16px 40px;
   text-align: center;
 }
 .screen.active { display: flex; }
@@ -87,9 +86,14 @@ body {
 /* ══ WHEEL SCREEN ══ */
 #screen-wheel {
   background: var(--white);
-  overflow-y: auto;
-  justify-content: flex-start;
   padding-top: 24px;
+}
+
+/* 計時/麥克風/結果畫面：垂直置中 */
+#screen-mic,
+#screen-game,
+#screen-result {
+  justify-content: center;
 }
 
 .wheel-header {
@@ -228,6 +232,7 @@ body {
   display: none;
   position: fixed;
   inset: 0;
+  overflow-y: auto;
   background: var(--yellow);
   z-index: 200;
   flex-direction: column;
